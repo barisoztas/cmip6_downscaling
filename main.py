@@ -54,8 +54,7 @@ if __name__ == "__main__":
     cmip6_stations_selection_object = cmip6_stations_selection()
     cmip6_stations_selection_object.find_cmip6_grids()
     for current_cmip6_grid in cmip6_stations_selection_object.grid_list:
-        grid_name = (os.path.split(current_cmip6_grid)[1]).split('_')[1:-1]
-        grid_name = '_'.join(grid_name)
+        grid_name = '-'.join((os.path.split(current_cmip6_grid)[1]).split('_')[1:-1])
         print(f"Processing {grid_name}!!: Here is the results:")
         current_cmip6_grid = cmip6_stations_selection_object.read_grid(current_cmip6_grid)
         cmip6_stations_selection_object.read_stations()
