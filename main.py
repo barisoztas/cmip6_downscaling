@@ -1,24 +1,26 @@
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
+import pathlib
+import os
 
 
 class cmip6_stations_selection(object):
-
     def __init__(self):
-        self.grid_folder = r"/home/baris/PycharmProjects/cmip6_downscaling/results/elevation_wgs84/"
-        self.cmip6_grid_file = r"/home/baris/PycharmProjects/cmip6_downscaling/results/elevation_wgs84/" \
-                               r"elevation_grid_access_cm_2_rotated.shp"
-
+        self.grid_folder = r"/home/baris/PycharmProjects/cmip6_downscaling/results/elevation_median/"
         self.station_csv = r"/home/baris/PycharmProjects/cmip6_downscaling/tr_stations/stations.csv"
         self.output_folder = r"/home/baris/PycharmProjects/cmip6_downscaling/output/"
-        self.cmip6_grid = None
         self.tr_stations_pandas = None
         self.tr_stations = None
         self.tr_stations_geopandas = None
+        self.grid_list = []
 
-    def read_grid(self):
-        self.cmip6_grid = gpd.read_file(self.cmip6_grid_file)
+    def find_cmip6_grids(self):
+        for grid_file in pathlib.Path(self.grid_folder).glob('**/*.shp'):
+            self.grid_list.append(grid_file)
+
+    def read_grid(self,grid):
+        self.cmip6_grid = gpd.read_file(grid)
         return self.cmip6_grid
 
     def read_stations(self):
@@ -50,6 +52,11 @@ class cmip6_stations_selection(object):
 
 if __name__ == "__main__":
     cmip6_stations_selection_object = cmip6_stations_selection()
-    current_cmip6_grid = cmip6_stations_selection_object.read_grid()
-    cmip6_stations_selection_object.read_stations()
-    cmip6_stations_selection_object.find_representative_stations(current_cmip6_grid)
+    cmip6_stations_selection_object.find_cmip6_grids()
+    for current_cmip6_grid in cmip6_stations_selection_object.grid_list:
+        grid_name = (os.path.split(current_cmip6_grid)[1]).split('_')[1:-1]
+        grid_name = '_'.join(grid_name)
+        print(f"Processing {grid_name}!!: Here is the results:")
+        current_cmip6_grid = cmip6_stations_selection_object.read_grid(current_cmip6_grid)
+        cmip6_stations_selection_object.read_stations()
+        cmip6_stations_selection_object.find_representative_stations(current_cmip6_grid)
