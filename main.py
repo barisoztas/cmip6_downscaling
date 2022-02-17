@@ -58,7 +58,7 @@ class cmip6_stations_selection(object):
             best_stations = best_stations.sort_values(by="establish")
 
             # save best representative stations to dataframe
-            station_list.append(best_stations)
+            station_list.append(best_stations[:1])
 
 #           if len(station_elevation_list) == 0:
 #               print("There is no station in the grid!")
@@ -82,4 +82,3 @@ if __name__ == "__main__":
         cmip6_stations_selection_object.read_stations()
         cmip6_stations_selection_object.find_representative_stations(current_cmip6_grid, grid_name)
         cmip6_stations_selection_object.calculate_time()
-        
