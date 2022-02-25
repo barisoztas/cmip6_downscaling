@@ -6,13 +6,13 @@ import geopandas as gpd
 from shapely.geometry import Point
 
 
-class cmip6_stations_selection(object):
+class Cmip6StationSelection(object):
     def __init__(self):
         # Define folder where grids are reside in
         self.start_time = datetime.now()
-        self.grid_folder = r"/home/baris/PycharmProjects/cmip6_downscaling/results/elevation_median/"
-        self.station_csv = r"/home/baris/PycharmProjects/cmip6_downscaling/tr_stations/stations.csv"
-        self.output_folder = r"/home/baris/PycharmProjects/cmip6_downscaling/output/"
+        self.grid_folder = r"/home/hsaf/PycharmProjects/cmip6_downscaling/results/elevation_median/"
+        self.station_csv = r"/home/hsaf/PycharmProjects/cmip6_downscaling/tr_stations/stations.csv"
+        self.output_folder = r"/home/hsaf/PycharmProjects/cmip6_downscaling/output/deneme"
         self.tr_stations_pandas = None
         self.tr_stations_geopandas = None
         self.grid_list = []
@@ -20,7 +20,7 @@ class cmip6_stations_selection(object):
 
     def calculate_time(self):
         end_time = datetime.now()
-        total_time = self.start_time-end_time
+        total_time = end_time-self.start_time
         print(f"Total time: {total_time} minutes")
 
     def find_cmip6_grids(self):
@@ -54,7 +54,7 @@ class cmip6_stations_selection(object):
             best_elevation = sorted_stations[:1].elevation.to_numpy()
             elevation_mask = sorted_stations['elevation'].values == best_elevation
             best_stations = sorted_stations[elevation_mask]
-            best_stations['establish'] = pd.to_datetime(best_stations['establish'], format='%Y-%m-%d')
+            best_stations.loc[:, 'establish'] = pd.to_datetime(best_stations.loc[:, 'establish'], format='%Y-%m-%d')
             best_stations = best_stations.sort_values(by="establish")
 
             # save best representative stations to dataframe
@@ -70,15 +70,18 @@ class cmip6_stations_selection(object):
         output_path = os.path.join(self.output_folder, current_grid + '_stations.csv')
         station_list = pd.concat(station_list)
         station_list.to_csv(output_path)
+        print(station_list)
 
 
 if __name__ == "__main__":
-    cmip6_stations_selection_object = cmip6_stations_selection()
+    pd.options.mode.chained_assignment = None  # default='warn'
+
+    cmip6_stations_selection_object = Cmip6StationSelection()
     cmip6_stations_selection_object.find_cmip6_grids()
+    cmip6_stations_selection_object.read_stations()
     for current_cmip6_grid in cmip6_stations_selection_object.grid_list:
         grid_name = '-'.join((os.path.split(current_cmip6_grid)[1]).split('_')[1:-1])
         print(f"Processing {grid_name}!!: Here is the results:")
         current_cmip6_grid = cmip6_stations_selection_object.read_grid(current_cmip6_grid)
-        cmip6_stations_selection_object.read_stations()
         cmip6_stations_selection_object.find_representative_stations(current_cmip6_grid, grid_name)
-        cmip6_stations_selection_object.calculate_time()
+    cmip6_stations_selection_object.calculate_time()
