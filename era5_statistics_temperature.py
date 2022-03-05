@@ -15,9 +15,9 @@ class Era5Extraction(object):
         # Define folder where grids are reside in
         self.start_time = datetime.datetime.now()
         self.PARAMETER = 't2m'
-        self.input_folder_era5 = r"/home/hsaf/ponderful/ERA5/2m_temperature/daily_era5"
-        self.output_folder_zonal_stats = r"./results/ZonalStats"
-        self.grid_folder = r"./results/elevation_median/t2m/"
+        self.input_folder_era5 = r"/home/baris/Desktop/new/data/era5"
+        self.output_folder_zonal_stats = r"./data/era5/output"
+        self.grid_folder = r"./data/grids/temp/"
         self.era5_path = None
         self.era5_ds = None
         self.grid_list = []
@@ -25,7 +25,7 @@ class Era5Extraction(object):
         self.results_database = []
 
     def find_era5(self):
-        for era5 in pathlib.Path(self.input_folder_era5).glob('**/2m_temperature_daily_1979_2014.nc'):
+        for era5 in pathlib.Path(self.input_folder_era5).glob('**/2m_temperature_daily_1995_1996.nc'):
             self.era5_path = era5
         print("ERA5 is found!")
 
@@ -50,7 +50,7 @@ class Era5Extraction(object):
         all_days = self.era5_ds['time'].values
         # loop into each day and calculate statistics
         for day in range(len(all_days)):
-            era5_da = self.era5_ds[day,:,:]
+            era5_da = self.era5_ds[day, :, :]
             era5_da = era5_da.values
             era5_stats = zonal_stats(shp_df.geometry, era5_da,
                                          affine=affine, stats=['min', 'max', 'median', 'mean', 'count'])
