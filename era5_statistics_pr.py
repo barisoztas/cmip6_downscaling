@@ -1,3 +1,4 @@
+
 import os
 import datetime
 import pathlib
@@ -15,9 +16,9 @@ class Era5Extraction(object):
         # Define folder where grids are reside in
         self.start_time = datetime.datetime.now()
         self.PARAMETER = 'tp'
-        self.input_folder_era5 = r"/home/hsaf/ponderful/ERA5/total_precipitation/daily_precipitation"
-        self.output_folder_zonal_stats = r"./results/ZonalStats"
-        self.grid_folder = r"./results/elevation_median/pr/"
+        self.input_folder_era5 = r"/home/baris/Desktop/new/data/era5"
+        self.output_folder_zonal_stats = r"./data/era5/output"
+        self.grid_folder = r"./data/grids/pr/"
         self.era5_path = None
         self.era5_ds = None
         self.grid_list = []
@@ -25,7 +26,7 @@ class Era5Extraction(object):
         self.results_database = []
 
     def find_era5(self):
-        for era5 in pathlib.Path(self.input_folder_era5).glob('**/total_precipitation_daily_1979_2014.nc'):
+        for era5 in pathlib.Path(self.input_folder_era5).glob('**/total_precipitation_daily_1995_2004.nc'):
             self.era5_path = era5
         print("ERA5 is found!")
 
@@ -53,7 +54,7 @@ class Era5Extraction(object):
             era5_da = self.era5_ds[day,:,:]
             era5_da = era5_da.values
             era5_stats = zonal_stats(shp_df.geometry, era5_da,
-                                         affine=affine, stats=['min', 'max', 'median', 'mean', 'count', 'sum'])
+                                         affine=affine, stats=['min', 'max', 'median', 'mean', 'count'])
             current_date = all_days[day]
             date = np.full(shape=len(era5_stats),fill_value=current_date)
             era5_stats_pd = pd.DataFrame.from_records(era5_stats)
@@ -65,11 +66,12 @@ class Era5Extraction(object):
         self.results_database = pd.concat(self.results_database)
         current_grid_name = '-'.join((os.path.split(current_cmip6_grid)[1]).split('_')[1:-1])
         write_path = os.path.join(self.output_folder_zonal_stats, current_grid_name+'.csv')
-        new_column_names = ['min_era5', 'max_era5','mean_era5', 'count_era5', 'sum_era5', 'median_era5', 'date']
+        new_column_names = ['min_era5', 'max_era5','mean_era5', 'count_era5', 'median_era5', 'date']
         self.results_database.set_axis(new_column_names, axis=1, inplace=True)
         new_column_names_sorted = ['date', 'count_era5', 'min_era5', 'max_era5', 'median_era5', 'mean_era5']
         self.results_database = self.results_database.reindex(columns = new_column_names_sorted)
         self.results_database.to_csv(path_or_buf=write_path, index_label='id')
+
 
 if __name__ == '__main__':
     ERA5ExtractionObject = Era5Extraction()
